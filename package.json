@@ -1,0 +1,31 @@
+{
+  "name": "chordsage",
+  "version": "1.0.0",
+  "description": "Chord tool",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apvilkko/chordsage.git"
+  },
+  "author": "Antti Pekka Vilkko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/apvilkko/chordsage/issues"
+  },
+  "homepage": "https://github.com/apvilkko/chordsage#readme",
+  "devDependencies": {
+    "babelify": "^6.3.0",
+    "browserify": "^11.1.0",
+    "gulp": "^3.9.0",
+    "gulp-sourcemaps": "^1.5.2",
+    "lex": "^1.7.9",
+    "lodash": "^3.10.1",
+    "vexflow": "^1.2.36",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^3.4.0"
+  }
+}
