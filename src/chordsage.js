@@ -1,5 +1,5 @@
-import ChordParser from './parser.js';
-import InputOutput from './io.js';
+import ChordParser from './parser';
+import InputOutput from './io';
 
 class ChordSage {
   constructor() {
@@ -7,7 +7,10 @@ class ChordSage {
     this.io = new InputOutput(this.parser);
     this.setupInput();
 
-    this.onInputChange("C");
+    let initialChord = "Eadd4/F#";
+    var input = document.getElementById("chordInput");
+    input.value = initialChord;
+    this.onInputChange(initialChord);
   }
   setupInput() {
     this.io.bindEvent('chordInput', 'input', (value) => {
@@ -19,6 +22,7 @@ class ChordSage {
     if (result === true) {
       this.io.setValue('result', this.parser.toString());
       this.io.draw(this.parser.getModel());
+      this.io.play(this.parser.getModel());
     } else {
       this.io.setValue('result', "What? " + result);
       this.io.draw(null);
