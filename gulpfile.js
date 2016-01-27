@@ -34,10 +34,11 @@ function compileTests() {
 }
 
 function compile(watch, sources, target, tests) {
-  var bundler = watchify(browserify({
+  var browserifyTask = browserify({
     entries: sources,
     debug: true
-  }).transform(babel));
+  }).transform(babel);
+  var bundler = watch ? watchify(browserifyTask) : browserifyTask;
 
   function rebundle() {
     bundler.bundle()
@@ -70,7 +71,9 @@ function testWatch() {
   return compile(true, glob.sync(specFiles), 'specs.js', true);
 }
 
-gulp.task('build', function() { return compile(); });
+gulp.task('build', function() { return compile(false, './src/index.js', 'build.js'); });
+gulp.task('build-tests', function() { return compileTests(); });
+gulp.task('run-tests', ['build-tests'], function() { return runTests(); });
 gulp.task('watch', function() { return watch(); });
 gulp.task('webserver', function() {
   connect.server({
@@ -79,3 +82,4 @@ gulp.task('webserver', function() {
 });
 gulp.task('test-watch', function () { return testWatch(); });
 gulp.task('default', ['webserver', 'watch']);
+gulp.task('test', ['build-tests', 'run-tests']);

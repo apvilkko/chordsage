@@ -68,6 +68,16 @@ class InputOutput {
       formatter = new Vex.Flow.Formatter().joinVoices([voice]).format([voice]);
       voice.draw(ctx, stave);
     }
+    this.drawGuitarTab(model);
+  }
+  drawGuitarTab(model) {
+    let element = document.getElementById('tab');
+    let size = '5';
+    element.innerHTML = '&nbsp;';
+    element.setAttribute('data-chord', model.guitar + ' [123456] ' + size);
+    setTimeout(function() {
+      Chord.render([element]);
+    });
   }
   initMIDI() {
     MIDI.loadPlugin({

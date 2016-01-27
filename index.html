@@ -7,6 +7,7 @@
     <script src="node_modules/vexflow/releases/vexflow-min.js"></script>
     <script src="lib/midi-js/shim/Base64binary.js"></script>
     <script src="lib/midi-js/MIDI.min.js"></script>
+    <script src="lib/chordjs/chord.js"></script>
 </head>
 <body>
   <h1>ChordSage</h1>
@@ -14,7 +15,10 @@
     <input type="text" id="chordInput" placeholder="Type in any chord">
     <div id="result"></div>
     <div id="notation">
-      <canvas id="canvas" width="320" height="300"></canvas>
+      <canvas id="canvas" width="320" height="180"></canvas>
+    </div>
+    <div id="guitar">
+      <span id="tab"></span>
     </div>
   </div>
 <script src="build/build.js"></script>

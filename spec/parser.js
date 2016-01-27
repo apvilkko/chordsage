@@ -47,6 +47,31 @@ describe('ChordBuilder', function () {
     let parser = new ChordParser();
     let builder = new ChordBuilder();
 
+    parser.parse('E');
+    builder.buildChord(parser.model);
+    verify(['E/4', 'G#/4', 'B/4'], parser.model.notes);
+    expect(parser.model.guitar).toEqual('022100');
+
+    parser.parse('dsus4');
+    builder.buildChord(parser.model);
+    verify(['D/4', 'G/4', 'A/4'], parser.model.notes);
+    expect(parser.model.guitar).toEqual('xx0233');
+
+    parser.parse('A');
+    builder.buildChord(parser.model);
+    verify(['A/3', 'C#/4', 'E/4'], parser.model.notes);
+    expect(parser.model.guitar).toEqual('x02220');
+
+    parser.parse('Asus2');
+    builder.buildChord(parser.model);
+    verify(['A/3', 'B/3', 'E/4'], parser.model.notes);
+    expect(parser.model.guitar).toEqual('x02200');
+
+    parser.parse('Asus4');
+    builder.buildChord(parser.model);
+    verify(['A/3', 'D/4', 'E/4'], parser.model.notes);
+    expect(parser.model.guitar).toEqual('x02230');
+
     parser.parse('gbm7');
     builder.buildChord(parser.model);
     verify(['Gb/4', 'Bbb/4', 'Db/5', 'Fb/5'], parser.model.notes);

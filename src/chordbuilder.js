@@ -77,6 +77,12 @@ function getAbsNote(root, acc) {
   return NOTES[root + (acc ? acc : '')];
 }
 
+function getDistance(from, to) {
+  let a = NOTES[from];
+  let b = getAbsNote(to.note, to.accidental);
+  return b >= a ? (b - a) : (b - a + 12);
+}
+
 function getNote(model, distance, role) {
   var root = model.root;
   var acc = model.rootModifier;
@@ -126,6 +132,13 @@ function adjustWithAccidental(value, accidental) {
     default:
       return value;
   }
+}
+
+function isSuitableForGuitarString(note, stringNumber) {
+  if (stringNumber <= 1) {
+    return note.role === 'root' || (note.role === 'fifth');
+  }
+  return true;
 }
 
 function toMidiNote(note) {
@@ -225,6 +238,7 @@ class ChordBuilder {
     if (notes.length > 0) {
       this.setMidiNotes();
     }
+    this.buildGuitarChord();
   }
   setMidiNotes() {
     let octave = 3;
@@ -254,6 +268,85 @@ class ChordBuilder {
       };
       this.model.bassNote.midiNote = toMidiNote(this.model.bassNote);
     }
+  }
+  buildGuitarChord() {
+    const freeStrings = ['E', 'A', 'D', 'G', 'B', 'E'];
+    let notes = this.model.notes;
+
+    function emptyTab() {
+      return {tab: 'x', note: null};
+    }
+
+    let tab = _.map(freeStrings, emptyTab);
+    // Set possible free strings first
+    for (let i = 0; i < notes.length; ++i) {
+      let note = notes[i];
+      if (!note.accidental) {
+        for (let j = 0; j < freeStrings.length; ++j) {
+          if (!isSuitableForGuitarString(note, j)) {
+            continue;
+          }
+          if (freeStrings[j] === note.note) {
+            tab[j] = {
+              tab: 0,
+              note: note,
+              index: j
+            };
+          }
+        }
+      }
+    }
+
+    function assignString(j, chord, onlyMainNotes) {
+      let freeNote = freeStrings[j];
+      //console.log("freeNote", freeNote);
+      let smallestDistance = _(chord).map(function (note, index) {
+        return {
+          distance: getDistance(freeNote, note) +
+            (isSuitableForGuitarString(note, j) ? 0 : 12) +
+            ((onlyMainNotes && (note.role !== 'root' && note.role !== 'fifth')) ? 12 : 0),
+          note: note
+        };
+      }).sortBy(function (item) {
+        //console.log(item.note.note, item.distance);
+        return item.distance;
+      }).first();
+      //console.log(smallestDistance);
+      tab[j] = {
+        tab: smallestDistance.distance,
+        note: smallestDistance.note,
+        index: j
+      };
+    }
+
+    for (let j = 0; j < tab.length; ++j) {
+      if (tab[j].tab === 'x') {
+        assignString(j, notes);
+      }
+    }
+
+    // try to make root note the lowest string
+    if (tab[0].note.role !== 'root') {
+      tab[0] = emptyTab();
+      if (tab[1].note.role !== 'root') {
+        tab[1] = emptyTab();
+      }
+    }
+
+    // try to remove double thirds
+    let thirds = _(tab).filter(function(item) {
+      return item.note && item.note.role === 'third';
+    }).value();
+    if (thirds.length > 1) {
+      // leave the highest
+      thirds.pop();
+      _.each(thirds, function (item) {
+        tab[item.index] = emptyTab();
+        assignString(item.index, notes, true);
+      });
+    }
+
+    this.model.guitar = _.map(tab, 'tab').join('');
   }
 }
 
