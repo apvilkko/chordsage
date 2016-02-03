@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ChordSage</title>
     <link rel="stylesheet" href="style.css">
     <script src="node_modules/vexflow/releases/vexflow-min.js"></script>
@@ -10,15 +11,29 @@
     <script src="lib/chordjs/chord.js"></script>
 </head>
 <body>
-  <h1>ChordSage</h1>
   <div id="main">
-    <input type="text" id="chordInput" placeholder="Type in any chord">
-    <div id="result"></div>
-    <div id="notation">
-      <canvas id="canvas" width="320" height="180"></canvas>
+    <div class="header">
+      <h1>ChordSage</h1>
+      <input type="text" id="chordInput" placeholder="Type in any chord">
     </div>
-    <div id="guitar">
-      <span id="tab"></span>
+    <div class="content">
+      <div id="result"></div>
+      <div id="notation">
+        <canvas id="canvas" width="320" height="180"></canvas>
+      </div>
+      <div id="guitar">
+        <span id="tab"></span>
+        <div class="guitar-controls">
+          <button id="posLower">▲</button>
+          <button id="posHigher">▼</button>
+          <span id="curPosition"></span>
+          <label>Max fret span <input type="number" id="fretSpread" min="1" max="9"></label>
+        </div>
+      </div>
+      <div class="about">
+        <p>ChordSage recognizes and builds chords programmatically. The produced voicings are not necessarily optimal nor complete.</p>
+        <p>Made by Antti Pekka Vilkko. Code on <a href="https://github.com/apvilkko/chordsage">Github</a>.</p>
+      </div>
     </div>
   </div>
 <script src="build/build.js"></script>

@@ -48,6 +48,18 @@ function watch() {
   return compile(true, './src/index.js', 'build.js');
 }
 
+gulp.task('browserify-watch', () => {
+  return watch();
+});
+
+gulp.task('html', () => {
+  gulp.src('index.html').pipe(connect.reload());
+});
+
+gulp.task('style', () => {
+  gulp.src('style.css').pipe(connect.reload());
+});
+
 function testWatch() {
   return compile(true, glob.sync(specFiles), 'specs.js', true);
 }
@@ -63,7 +75,11 @@ function compileTests() {
 gulp.task('build', function() { return compile(false, './src/index.js', 'build.js'); });
 gulp.task('build-tests', function() { return compileTests(); });
 gulp.task('run-tests', ['build-tests'], function() { return runTests(); });
-gulp.task('watch', function() { return watch(); });
+gulp.task('watch', /*['browserify-watch'],*/ () => {
+  compile(true, './src/index.js', 'build.js');
+  gulp.watch(['style.css'], ['style']);
+  gulp.watch(['index.html'], ['html']);
+});
 gulp.task('webserver', function() { connect.server({livereload: true}); });
 gulp.task('test-watch', function () { return testWatch(); });
 gulp.task('default', ['webserver', 'watch']);

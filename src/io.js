@@ -72,9 +72,10 @@ class InputOutput {
   }
   drawGuitarTab(model) {
     let element = document.getElementById('tab');
-    let size = '5';
+    let size = '7';
     element.innerHTML = '&nbsp;';
-    element.setAttribute('data-chord', model.guitar + ' [123456] ' + size);
+    //element.setAttribute('data-chord', model.guitar + ' [123456] ' + size);
+    element.setAttribute('data-chord', model.guitar + ' ' + size);
     setTimeout(function() {
       Chord.render([element]);
     });

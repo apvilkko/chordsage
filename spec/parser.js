@@ -1,10 +1,25 @@
 import ChordParser from '../src/parser';
 import ChordBuilder from '../src/chordbuilder';
-import _ from '../node_modules/lodash';
+import _ from 'lodash';
+
+const config = {
+  freeStrings: ['E', 'A', 'D', 'G', 'B', 'E'],
+  fretSpread: 4,
+  fretPosition: 1,
+  chordInput: 'Dmaj7/F#'
+};
+
+function createParser(conf) {
+  return new ChordParser(conf || config);
+}
+
+function createBuilder(conf) {
+  return new ChordBuilder(conf || config);
+}
 
 describe('ChordParser', function () {
   it('should parse chord input', function () {
-    let parser = new ChordParser();
+    let parser = createParser();
     parser.parse('CM7');
     expect(parser.toString()).toEqual('Cmaj7');
     parser.parse('d7sus4');
@@ -26,51 +41,81 @@ function verify(expected, notes) {
 
 describe('ChordBuilder', function () {
   it('should set notes for Vex', function () {
-    let parser = new ChordParser();
-    let builder = new ChordBuilder();
+    let parser = createParser();
+    let builder = createBuilder();
     parser.parse('bm7');
     builder.buildChord(parser.model);
     let expected = ['B/3', 'D/4', 'F#/4', 'A/4'];
     let vexNotes = _.map(parser.model.notes, 'vexNote');
     expect(vexNotes).toEqual(expected);
   });
+
   it('should set midi notes', function () {
-    let parser = new ChordParser();
-    let builder = new ChordBuilder();
+    let parser = createParser();
+    let builder = createBuilder();
     parser.parse('Ebmaj7');
     builder.buildChord(parser.model);
     let expected = [63, 67, 70, 74];
     let notes = _.map(parser.model.notes, 'midiNote');
     expect(notes).toEqual(expected);
   });
-  it('should handle a bunch of chords', function () {
-    let parser = new ChordParser();
-    let builder = new ChordBuilder();
+
+  it('should handle guitar chords', function () {
+    let parser = createParser();
+    let builder = createBuilder();
 
     parser.parse('E');
     builder.buildChord(parser.model);
-    verify(['E/4', 'G#/4', 'B/4'], parser.model.notes);
     expect(parser.model.guitar).toEqual('022100');
 
     parser.parse('dsus4');
     builder.buildChord(parser.model);
-    verify(['D/4', 'G/4', 'A/4'], parser.model.notes);
     expect(parser.model.guitar).toEqual('xx0233');
 
     parser.parse('A');
     builder.buildChord(parser.model);
-    verify(['A/3', 'C#/4', 'E/4'], parser.model.notes);
     expect(parser.model.guitar).toEqual('x02220');
 
     parser.parse('Asus2');
     builder.buildChord(parser.model);
-    verify(['A/3', 'B/3', 'E/4'], parser.model.notes);
     expect(parser.model.guitar).toEqual('x02200');
 
     parser.parse('Asus4');
     builder.buildChord(parser.model);
-    verify(['A/3', 'D/4', 'E/4'], parser.model.notes);
     expect(parser.model.guitar).toEqual('x02230');
+
+    parser.parse('g#maj7');
+    builder.buildChord(parser.model);
+    expect(parser.model.guitar).toEqual('4x1113');
+  });
+
+  it('should handle a bunch of chords', function () {
+    let parser = createParser();
+    let builder = createBuilder();
+
+    parser.parse('Eadd2');
+    builder.buildChord(parser.model);
+    verify(['E/4', 'F#/4', 'G#/4', 'B/4'], parser.model.notes);
+
+    parser.parse('E');
+    builder.buildChord(parser.model);
+    verify(['E/4', 'G#/4', 'B/4'], parser.model.notes);
+
+    parser.parse('dsus4');
+    builder.buildChord(parser.model);
+    verify(['D/4', 'G/4', 'A/4'], parser.model.notes);
+
+    parser.parse('A');
+    builder.buildChord(parser.model);
+    verify(['A/3', 'C#/4', 'E/4'], parser.model.notes);
+
+    parser.parse('Asus2');
+    builder.buildChord(parser.model);
+    verify(['A/3', 'B/3', 'E/4'], parser.model.notes);
+
+    parser.parse('Asus4');
+    builder.buildChord(parser.model);
+    verify(['A/3', 'D/4', 'E/4'], parser.model.notes);
 
     parser.parse('gbm7');
     builder.buildChord(parser.model);

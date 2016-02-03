@@ -1,6 +1,6 @@
-import Lexer from '../node_modules/lex/lexer';
+import Lexer from 'lex/lexer';
 import ChordBuilder from './chordbuilder';
-import _ from '../node_modules/lodash';
+import _ from 'lodash';
 
 function doPush(arr, value) {
   if (value) {
@@ -25,10 +25,10 @@ function toAccidental(value) {
 
 
 class ChordParser {
-  constructor() {
+  constructor(config) {
     this.resetModel();
     this.setupLexer();
-    this.builder = new ChordBuilder();
+    this.builder = new ChordBuilder(config);
   }
   setupLexer() {
     this.lexer = new Lexer((char) => {
@@ -66,6 +66,10 @@ class ChordParser {
   }
   getModel() {
     return this.model;
+  }
+  reparse() {
+    this.builder.buildChord(this.model);
+    return true;
   }
   parse(value) {
     this.resetModel();

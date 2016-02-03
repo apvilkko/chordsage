@@ -1,4 +1,4 @@
-import _ from '../node_modules/lodash';
+import _ from 'lodash';
 
 var NOTES = {
   'B#': 0,
@@ -84,6 +84,7 @@ function getDistance(from, to) {
 }
 
 function getNote(model, distance, role) {
+  //console.log("getNote", model, distance, role);
   var root = model.root;
   var acc = model.rootModifier;
   var absNote = getAbsNote(root, acc);
@@ -103,6 +104,7 @@ function getNote(model, distance, role) {
 }
 
 var INTERVAL = {
+  2: 2,
   4: 5,
   5: 7,
   9: 14,
@@ -114,8 +116,8 @@ function getSeventh(model) {
 }
 
 function getExtraNote(note, chord) {
-  //console.log("getExtraNote", note, chord);
   var distance = adjustWithAccidental(INTERVAL[note.interval], note.accidental);
+  //console.log("getExtraNote", note, chord, distance);
   return getNote(chord, distance, note.interval);
 }
 
@@ -152,7 +154,8 @@ function octaveChanged(a, b) {
 
 
 class ChordBuilder {
-  constructor() {
+  constructor(config) {
+    this.config = config;
   }
   buildChord(model) {
     this.model = model;
@@ -226,7 +229,7 @@ class ChordBuilder {
             let hasThird = _.findIndex(notes, {role: 'third'});
             let pos = hasThird ? hasThird + 1 : 1;
             notes.splice(pos, 0, extraNote);
-          } else if (item.action === 'add' && item.interval === 9) {
+          } else if (item.action === 'add' && item.interval === 9 || item.interval === 2) {
             notes.splice(1, 0, extraNote);
           } else {
             notes.push(extraNote);
@@ -270,11 +273,13 @@ class ChordBuilder {
     }
   }
   buildGuitarChord() {
-    const freeStrings = ['E', 'A', 'D', 'G', 'B', 'E'];
+    let freeStrings = this.config.freeStrings;
+    let fretSpread = parseInt(this.config.fretSpread, 10);
+    let fretPosition = parseInt(this.config.fretPosition, 10);
     let notes = this.model.notes;
 
-    function emptyTab() {
-      return {tab: 'x', note: null};
+    function emptyTab(index) {
+      return {tab: 'x', note: null, index: index};
     }
 
     let tab = _.map(freeStrings, emptyTab);
@@ -301,22 +306,27 @@ class ChordBuilder {
       let freeNote = freeStrings[j];
       //console.log("freeNote", freeNote);
       let smallestDistance = _(chord).map(function (note, index) {
+        let dist = getDistance(freeNote, note) +
+          (isSuitableForGuitarString(note, j) ? 0 : 36) +
+          ((onlyMainNotes && (note.role !== 'root' && note.role !== 'fifth')) ? 36 : 0);
         return {
-          distance: getDistance(freeNote, note) +
-            (isSuitableForGuitarString(note, j) ? 0 : 12) +
-            ((onlyMainNotes && (note.role !== 'root' && note.role !== 'fifth')) ? 12 : 0),
+          distance: dist,
           note: note
         };
+      }).filter(function (item) {
+        return (item.distance >= fretPosition) && ((fretPosition + fretSpread) > item.distance);
       }).sortBy(function (item) {
         //console.log(item.note.note, item.distance);
         return item.distance;
       }).first();
       //console.log(smallestDistance);
-      tab[j] = {
-        tab: smallestDistance.distance,
-        note: smallestDistance.note,
-        index: j
-      };
+      if (smallestDistance) {
+        tab[j] = {
+          tab: smallestDistance.distance,
+          note: smallestDistance.note,
+          index: j
+        };
+      }
     }
 
     for (let j = 0; j < tab.length; ++j) {
@@ -326,12 +336,19 @@ class ChordBuilder {
     }
 
     // try to make root note the lowest string
-    if (tab[0].note.role !== 'root') {
-      tab[0] = emptyTab();
-      if (tab[1].note.role !== 'root') {
-        tab[1] = emptyTab();
-      }
+    function notMute(item) {
+      return item.tab !== 'x';
     }
+    function clearNonRoots() {
+      let lowest = _.findIndex(tab, notMute);
+      _(tab).filter(function (item) {
+        return notMute(item) && item.index === lowest && item.note.role !== 'root';
+      }).map('index').each(function (index) {
+        tab[index] = emptyTab();
+      }).value();
+    }
+    clearNonRoots();
+    clearNonRoots();
 
     // try to remove double thirds
     let thirds = _(tab).filter(function(item) {
@@ -346,7 +363,8 @@ class ChordBuilder {
       });
     }
 
-    this.model.guitar = _.map(tab, 'tab').join('');
+    //console.log(tab);
+    this.model.guitar = _.map(tab, 'tab').join('-');
   }
 }
 
