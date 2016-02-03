@@ -1,4 +1,4 @@
-# [chordsage](http://aapee.kapsi.fi/random-stuff/chordsage/)
+# [chordsage](http://aapee.kapsi.fi/chordsage/)
 Chord tool that tries to be intelligent and recognize anything you type in. It will show the chord notation for piano and guitar, and play it.
 
 ## Used components
